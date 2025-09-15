@@ -12,9 +12,9 @@ interface AutosaveState {
 interface AutosaveOptions {
   projectId: string;
   saveInterval?: number; // milliseconds
-  onSaveSuccess?: (data: any) => void;
+  onSaveSuccess?: (data: { savedAt: string; version: number }) => void;
   onSaveError?: (error: string) => void;
-  onRecoveryAvailable?: (data: any) => void;
+  onRecoveryAvailable?: (data: { draftContent: { text: string }; version: number; lastSavedAt: string }) => void;
 }
 
 export const useAutosave = (options: AutosaveOptions) => {
@@ -30,7 +30,7 @@ export const useAutosave = (options: AutosaveOptions) => {
 
   const socketRef = useRef<Socket | null>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const contentRef = useRef<any>(null);
+  const contentRef = useRef<{ text: string; timestamp: Date } | null>(null);
 
   // Initialize Socket.IO connection
   useEffect(() => {
@@ -77,7 +77,7 @@ export const useAutosave = (options: AutosaveOptions) => {
   }, [projectId, onSaveSuccess, onSaveError]);
 
   // Auto-save function
-  const saveContent = useCallback(async (content: any) => {
+  const saveContent = useCallback(async (content: { text: string; timestamp: Date }) => {
     if (!socketRef.current) return;
 
     setState(prev => ({ ...prev, isSaving: true, error: null }));
@@ -99,7 +99,7 @@ export const useAutosave = (options: AutosaveOptions) => {
   }, [projectId, onSaveError]);
 
   // Manual save function
-  const manualSave = useCallback(async (content: any) => {
+  const manualSave = useCallback(async (content: { text: string; timestamp: Date }) => {
     try {
       const response = await fetch(`http://localhost:3001/api/autosave/project/${projectId}/save`, {
         method: 'POST',
@@ -151,7 +151,7 @@ export const useAutosave = (options: AutosaveOptions) => {
   }, [projectId, onRecoveryAvailable]);
 
   // Auto-save timer
-  const scheduleAutosave = useCallback((content: any) => {
+  const scheduleAutosave = useCallback((content: { text: string; timestamp: Date }) => {
     contentRef.current = content;
     setState(prev => ({ ...prev, hasUnsavedChanges: true }));
 

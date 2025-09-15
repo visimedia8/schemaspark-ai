@@ -10,7 +10,7 @@ interface AutosaveEditorProps {
 
 export default function AutosaveEditor({ projectId, initialContent = '' }: AutosaveEditorProps) {
   const [content, setContent] = useState(initialContent);
-  const [recoveryData, setRecoveryData] = useState<any>(null);
+  const [recoveryData, setRecoveryData] = useState<{ draftContent: { text: string }; lastSavedAt: string } | null>(null);
 
   const {
     isSaving,
@@ -18,7 +18,6 @@ export default function AutosaveEditor({ projectId, initialContent = '' }: Autos
     version,
     hasUnsavedChanges,
     error,
-    saveContent,
     manualSave,
     scheduleAutosave,
     checkRecovery

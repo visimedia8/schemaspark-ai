@@ -3,10 +3,13 @@
 import { useState } from 'react';
 import AutosaveEditor from '@/components/AutosaveEditor';
 import GuidedInterface from '@/components/GuidedInterface';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import { useAuth } from '../contexts/AuthContext';
 
 type ProcessingMode = 'single' | 'bulk';
 
 export default function Home() {
+  const { user, logout } = useAuth();
   const [currentView, setCurrentView] = useState<'dashboard' | 'editor'>('dashboard');
   const [interfaceMode, setInterfaceMode] = useState<'guided' | 'advanced'>('guided');
   const [processingMode, setProcessingMode] = useState<ProcessingMode>('single');
@@ -17,8 +20,8 @@ export default function Home() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [generatedSchema, setGeneratedSchema] = useState('');
-  const [competitorAnalysis, setCompetitorAnalysis] = useState<any>(null);
-  const [analysisResults, setAnalysisResults] = useState<any>(null);
+  const [competitorAnalysis, setCompetitorAnalysis] = useState<{ results?: Array<{ position: number; domain: string }> } | null>(null);
+  const [analysisResults, setAnalysisResults] = useState<{ competitorAnalysis?: { opportunityScore: number }; recommendations?: string[]; interconnectedSchema?: unknown } | null>(null);
 
   const handleGenerateSchema = async () => {
     const urlsToProcess = processingMode === 'single' ? [url] : bulkUrls.split('\n').filter(u => u.trim());
@@ -124,7 +127,8 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <ProtectedRoute>
+      <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -134,6 +138,17 @@ export default function Home() {
               <span className="ml-2 text-sm text-gray-500">AI-Powered Schema Markup Tool</span>
             </div>
             <div className="flex items-center space-x-4">
+              {/* User Info */}
+              <div className="flex items-center space-x-2 text-sm text-gray-600">
+                <span>Welcome, <strong>{user?.email}</strong></span>
+                <button
+                  onClick={logout}
+                  className="text-red-600 hover:text-red-800 font-medium"
+                >
+                  Logout
+                </button>
+              </div>
+
               {/* Interface Mode Toggle */}
               <div className="flex space-x-1 bg-purple-100 p-1 rounded-lg">
                 <button
@@ -343,7 +358,7 @@ https://example.com/blog/article3`}
                         </span>
                       ) : (
                         analysisMode === 'competitor' ?
-                          `🎯 Analyze & Generate Strategic Schema` :
+                          '🎯 Analyze & Generate Strategic Schema' :
                           `🚀 ${processingMode === 'single' ? 'Generate Schema' : 'Process URLs'}`
                       )}
                     </button>
@@ -364,7 +379,7 @@ https://example.com/blog/article3`}
                             Found <strong>{competitorAnalysis.results?.length || 0}</strong> competitors for "{keywords}"
                           </p>
                           <div className="mt-2 space-y-1">
-                            {competitorAnalysis.results?.slice(0, 3).map((result: any, index: number) => (
+                            {competitorAnalysis.results?.slice(0, 3).map((result: { position: number; domain: string }, index: number) => (
                               <div key={index} className="text-xs text-blue-600">
                                 {result.position}. {result.domain}
                               </div>
@@ -515,6 +530,7 @@ https://example.com/blog/article3`}
           </div>
         </div>
       </footer>
-    </div>
+      </div>
+    </ProtectedRoute>
   );
 }
