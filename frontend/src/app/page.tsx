@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import AutosaveEditor from '@/components/AutosaveEditor';
-import GuidedInterface from '@/components/GuidedInterface';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import { useAuth } from '@/contexts/AuthContext';
+import AutosaveEditor from '../components/AutosaveEditor';
+import GuidedInterface from '../components/GuidedInterface';
+import ProtectedRoute from '../components/ProtectedRoute';
+import { useAuth } from '../contexts/AuthContext';
 
 type ProcessingMode = 'single' | 'bulk';
 
