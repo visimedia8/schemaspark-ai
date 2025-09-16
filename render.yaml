@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: schemaspark-frontend
+    runtime: static
+    buildCommand: cd frontend && npm run build
+    staticPublishPath: frontend/.next
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_API_URL
+        value: https://schemaspark-ai.railway.internal
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: X-XSS-Protection
+        value: "1; mode=block"
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+      - path: /_next/static/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
